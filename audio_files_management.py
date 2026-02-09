@@ -1,16 +1,14 @@
 import os
 from logging import getLogger
-from pathlib import Path
 from typing import Any
 from yt_dlp import YoutubeDL
 
 from database import upsert_audio_metadata
 from models import AudioMetadata
+from utils import get_audio_file_location, get_audio_files_directory
 
 _LOG = getLogger(__name__)
 _YOUTUBE_URL_PREFIX = "https://youtube.com/watch?v={video_id}"
-_SCRIPT_DIR = Path(__file__).parent
-_AUDIO_FILES_DIRECTORY = f"{_SCRIPT_DIR}/audio_files"
 _MAX_SIZE_BYTES = 7_000_000
 
 
@@ -31,16 +29,16 @@ def download_audio_file(video_id: str) -> AudioMetadata:
 
 
 def delete_audio_file(video_id: str) -> bool:
-    audio_file_location = f"{_AUDIO_FILES_DIRECTORY}/{video_id}.m4a"
+    audio_file_location = get_audio_file_location(video_id)
     if not os.path.isfile(audio_file_location):
         return False
-    # TODO: delete metadata if stored
+    # TODO: delete relevant playlist stuff if stored
     os.remove(audio_file_location)
     return True
 
 
 def _create_yt_options(video_id: str) -> dict[str, Any]:
-    file_path = f"{_AUDIO_FILES_DIRECTORY}/{video_id}"
+    file_path = f"{get_audio_files_directory()}/{video_id}"
     yt_options = {
         "quiet": True,
         "format": "bestaudio/best",
