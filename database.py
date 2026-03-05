@@ -50,3 +50,26 @@ def delete_audio_metadata(video_id: str):
         params = {"video_id": video_id}
         cursor.execute(query, params)
         conn.commit()
+
+
+def fetch_audio_metadata_paginated(limit: int, offset: int) -> tuple[list[AudioMetadata], int]:
+    with (
+        psycopg.connect(_CONNECTION_STR) as conn,
+        conn.cursor() as cursor
+    ):
+        count_query = "SELECT COUNT(*) FROM audio_files"
+        cursor.execute(count_query)
+        total = cursor.fetchone()[0]
+
+        query = "SELECT * FROM audio_files ORDER BY title LIMIT %(limit)s OFFSET %(offset)s"
+        params = {"limit": limit, "offset": offset}
+        cursor.execute(query, params)
+        rows = cursor.fetchall()
+
+        if not rows or not cursor.description:
+            return [], total
+
+        cols = [desc[0] for desc in cursor.description]
+        songs = [AudioMetadata.model_validate(dict(zip(cols, row))) for row in rows]
+
+        return songs, total

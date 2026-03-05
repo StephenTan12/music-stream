@@ -1,13 +1,32 @@
-from fastapi import FastAPI, HTTPException
+from fastapi import FastAPI, HTTPException, Query
 from fastapi.responses import FileResponse
 import os
 
 from audio_files_management import delete_audio_file, download_audio_file
-from database import delete_audio_metadata, fetch_audio_metadata
-from models import AudioMetadata
+from database import delete_audio_metadata, fetch_audio_metadata, fetch_audio_metadata_paginated
+from models import AudioMetadata, PaginatedSongsResponse
 from utils import get_audio_file_location, validate_video_id
 
 app = FastAPI()
+
+
+@app.get("/songs")
+async def get_songs(
+    page: int = Query(default=1, ge=1),
+    page_size: int = Query(default=20, ge=1, le=100)
+) -> PaginatedSongsResponse:
+    offset = (page - 1) * page_size
+    songs, total = fetch_audio_metadata_paginated(limit=page_size, offset=offset)
+    total_pages = (total + page_size - 1) // page_size
+
+    return PaginatedSongsResponse(
+        songs=songs,
+        total=total,
+        page=page,
+        page_size=page_size,
+        total_pages=total_pages
+    )
+
 
 @app.post("/songs/{video_id}")
 async def download_song(video_id: str) -> AudioMetadata:
