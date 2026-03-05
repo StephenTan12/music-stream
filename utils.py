@@ -1,9 +1,9 @@
+import os
+
 from fastapi import HTTPException
-from pathlib import Path
 
 _INCLUDED_CHARACTERS = {"_", "-"}
-_SCRIPT_DIR = Path(__file__).parent
-_AUDIO_FILES_DIRECTORY = f"{_SCRIPT_DIR}/audio_files"
+_AUDIO_FILES_DIRECTORY = os.environ.get("AUDIO_FILES_DIRECTORY", "./audio_files")
 
 def validate_video_id(video_id: str) -> None:
     if not video_id:
