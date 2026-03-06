@@ -1,3 +1,4 @@
+from datetime import datetime
 from psycopg import sql
 from pydantic import BaseModel, ConfigDict, Field, field_validator
 from pydantic.alias_generators import to_camel
@@ -48,8 +49,26 @@ class PaginatedSongsResponse(BaseModel):
     model_config = ConfigDict(alias_generator=to_camel, populate_by_name=True)
 
 
-class SongPlaylist(BaseModel):
-    id: str
-    title: str
-    total_duration: int
-    song_ids: list[str]
+class Playlist(BaseModel):
+    id: int = Field(alias="id")
+    name: str = Field(alias="name")
+    description: str | None = Field(alias="description", default=None)
+    is_system: bool = Field(alias="is_system")
+    created_at: datetime = Field(alias="created_at")
+    updated_at: datetime = Field(alias="updated_at")
+
+    model_config = ConfigDict(alias_generator=to_camel, populate_by_name=True)
+
+
+class PlaylistWithSongs(Playlist):
+    songs: list[AudioMetadata]
+
+
+class PaginatedPlaylistsResponse(BaseModel):
+    playlists: list[Playlist]
+    total: int
+    page: int
+    page_size: int
+    total_pages: int
+
+    model_config = ConfigDict(alias_generator=to_camel, populate_by_name=True)
