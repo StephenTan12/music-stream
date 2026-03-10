@@ -131,7 +131,17 @@ def fetch_audio_metadata_paginated(limit: int, offset: int) -> tuple[list[AudioM
 def fetch_all_playlists() -> list[Playlist]:
     pool = get_connection_pool()
     with pool.connection() as conn, conn.cursor() as cursor:
-        query = "SELECT * FROM playlists ORDER BY is_system DESC, name ASC"
+        query = """
+            SELECT 
+                p.*,
+                COALESCE(COUNT(ps.song_id), 0) as total_songs,
+                COALESCE(SUM(af.duration), 0) as total_duration
+            FROM playlists p
+            LEFT JOIN playlist_songs ps ON p.id = ps.playlist_id
+            LEFT JOIN audio_files af ON ps.song_id = af.id
+            GROUP BY p.id
+            ORDER BY p.is_system DESC, p.name ASC
+        """
         cursor.execute(query)
         rows = cursor.fetchall()
 
@@ -147,7 +157,17 @@ def fetch_all_playlists() -> list[Playlist]:
 def fetch_playlist_with_songs(playlist_id: int) -> PlaylistWithSongs | None:
     pool = get_connection_pool()
     with pool.connection() as conn, conn.cursor() as cursor:
-        playlist_query = "SELECT * FROM playlists WHERE id = %(playlist_id)s"
+        playlist_query = """
+            SELECT 
+                p.*,
+                COALESCE(COUNT(ps.song_id), 0) as total_songs,
+                COALESCE(SUM(af.duration), 0) as total_duration
+            FROM playlists p
+            LEFT JOIN playlist_songs ps ON p.id = ps.playlist_id
+            LEFT JOIN audio_files af ON ps.song_id = af.id
+            WHERE p.id = %(playlist_id)s
+            GROUP BY p.id
+        """
         playlist_params = {"playlist_id": playlist_id}
         cursor.execute(playlist_query, playlist_params)
         playlist_row = cursor.fetchone()
@@ -224,7 +244,17 @@ def get_default_playlist_id() -> int:
 def fetch_playlist_by_name(name: str) -> Playlist | None:
     pool = get_connection_pool()
     with pool.connection() as conn, conn.cursor() as cursor:
-        query = "SELECT * FROM playlists WHERE name = %(name)s"
+        query = """
+            SELECT 
+                p.*,
+                COALESCE(COUNT(ps.song_id), 0) as total_songs,
+                COALESCE(SUM(af.duration), 0) as total_duration
+            FROM playlists p
+            LEFT JOIN playlist_songs ps ON p.id = ps.playlist_id
+            LEFT JOIN audio_files af ON ps.song_id = af.id
+            WHERE p.name = %(name)s
+            GROUP BY p.id
+        """
         params = {"name": name}
         cursor.execute(query, params)
         row = cursor.fetchone()

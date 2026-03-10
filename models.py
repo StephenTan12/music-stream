@@ -56,6 +56,8 @@ class Playlist(BaseModel):
     is_system: bool = Field(alias="is_system")
     created_at: datetime = Field(alias="created_at")
     updated_at: datetime = Field(alias="updated_at")
+    total_songs: int = Field(alias="total_songs", default=0)
+    total_duration: int = Field(alias="total_duration", default=0)
 
     model_config = ConfigDict(alias_generator=to_camel, populate_by_name=True)
 

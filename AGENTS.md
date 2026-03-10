@@ -73,6 +73,7 @@ Defined in `exceptions.py`:
 - Apply `ConfigDict(alias_generator=to_camel, populate_by_name=True)` for camelCase JSON serialization
 - Models can contain SQL generation methods (e.g., `psql_upsert_query`)
 - Available models: `AudioMetadata`, `Playlist`, `PlaylistWithSongs`, `PaginatedSongsResponse`, `PaginatedPlaylistsResponse`, `FailedSong`, `PlaylistImportResponse`
+- `Playlist` model includes computed fields: `total_songs` (count of songs) and `total_duration` (sum of all song durations in seconds)
 
 ### Database Operations
 - **Connection Pooling**: All operations use `get_connection_pool()` for sync or `get_async_connection_pool()` for async
