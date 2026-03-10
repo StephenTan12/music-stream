@@ -1,8 +1,7 @@
-import psycopg
 from psycopg_pool import AsyncConnectionPool, ConnectionPool
 
-from config import Config
-from models import AudioMetadata, Playlist, PlaylistWithSongs
+from .config import Config
+from .models import AudioMetadata, Playlist, PlaylistWithSongs
 
 _connection_pool: ConnectionPool | None = None
 _async_connection_pool: AsyncConnectionPool | None = None

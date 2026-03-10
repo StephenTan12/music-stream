@@ -1,5 +1,5 @@
-from config import Config
-from exceptions import InvalidVideoIdError
+from .config import Config
+from .exceptions import InvalidVideoIdError
 
 _INCLUDED_CHARACTERS = {"_", "-"}
 

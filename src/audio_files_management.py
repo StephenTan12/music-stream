@@ -4,15 +4,15 @@ from typing import Any
 from yt_dlp import YoutubeDL
 from yt_dlp.utils import DownloadError as YtDlpDownloadError
 
-from config import Config
-from database import (
+from .config import Config
+from .database import (
     add_song_to_playlist,
     get_default_playlist_id,
     upsert_audio_metadata,
 )
-from exceptions import DownloadError, FileTooLargeError, VideoNotFoundError
-from models import AudioMetadata
-from utils import get_audio_file_location, get_audio_files_directory
+from .exceptions import DownloadError, FileTooLargeError, VideoNotFoundError
+from .models import AudioMetadata
+from .utils import get_audio_file_location, get_audio_files_directory
 
 _LOG = getLogger(__name__)
 _YOUTUBE_URL_PREFIX = "https://youtube.com/watch?v={video_id}"

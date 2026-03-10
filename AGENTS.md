@@ -6,18 +6,20 @@ A FastAPI-based music streaming service that downloads audio from YouTube and se
 
 ```
 music-stream/
-├── main.py                    # FastAPI app entry point, API routes, exception handlers
-├── models.py                  # Pydantic models (AudioMetadata, Playlist, PlaylistWithSongs, etc.)
-├── database.py                # PostgreSQL database operations via psycopg
-├── audio_files_management.py  # YouTube download and search logic via yt-dlp
-├── utils.py                   # Validation helpers and file path utilities
-├── config.py                  # Centralized configuration from environment variables
-├── exceptions.py              # Custom exception classes
-├── schema.sql                 # Database schema definition
-├── requirements.txt           # Python dependencies
-├── start.sh                   # Dev server startup script
-├── audio_files/               # Downloaded audio storage (gitignored)
-└── .env                       # Environment variables (gitignored)
+├── src/
+│   ├── __init__.py
+│   ├── main.py                    # FastAPI app entry point, API routes, exception handlers
+│   ├── models.py                  # Pydantic models (AudioMetadata, Playlist, PlaylistWithSongs, etc.)
+│   ├── database.py                # PostgreSQL database operations via psycopg
+│   ├── audio_files_management.py  # YouTube download and search logic via yt-dlp
+│   ├── utils.py                   # Validation helpers and file path utilities
+│   ├── config.py                  # Centralized configuration from environment variables
+│   └── exceptions.py              # Custom exception classes
+├── schema.sql                     # Database schema definition
+├── requirements.txt               # Python dependencies
+├── start.sh                       # Dev server startup script
+├── audio_files/                   # Downloaded audio storage (gitignored)
+└── .env                           # Environment variables (gitignored)
 ```
 
 ## Tech Stack
@@ -146,7 +148,7 @@ The schema automatically creates an "All Songs" system playlist that contains al
 ```bash
 ./start.sh
 # or
-uvicorn main:app --reload
+uvicorn src.main:app --reload
 ```
 
 ## Direct Database Access with psql
