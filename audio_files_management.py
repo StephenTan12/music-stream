@@ -88,6 +88,10 @@ def _validate_file(ydl: YoutubeDL, video_url: str) -> tuple[AudioMetadata | None
 
     if not size or size > Config.MAX_FILE_SIZE_BYTES:
         return None, size
+    
+    if info.get("filesize") is None:
+        info["filesize"] = size
+    
     return AudioMetadata.model_validate(info), size
 
 
@@ -98,12 +102,19 @@ def _estimate_entry(entry: dict[str, Any], ydl: YoutubeDL, convert_bitrate_kbps:
     if not info:
         return None
 
-    fmt = info.get("requested_downloads", [{}])[0].get("format", {})
-    size = fmt.get("filesize") or fmt.get("filesize_approx")
+    requested_downloads = info.get("requested_downloads", [{}])
+    if requested_downloads:
+        fmt = requested_downloads[0]
+        size = fmt.get("filesize") or fmt.get("filesize_approx")
+        if size:
+            return size
+
+    size = info.get("filesize") or info.get("filesize_approx")
+    if size:
+        return size
 
     duration = info.get("duration")
-
-    if not size and duration:
+    if duration:
         return int((convert_bitrate_kbps * 1000 * duration) / 8)
 
     return None
