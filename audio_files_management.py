@@ -5,7 +5,11 @@ from yt_dlp import YoutubeDL
 from yt_dlp.utils import DownloadError as YtDlpDownloadError
 
 from config import Config
-from database import add_song_to_playlist, get_default_playlist_id, upsert_audio_metadata
+from database import (
+    add_song_to_playlist,
+    get_default_playlist_id,
+    upsert_audio_metadata,
+)
 from exceptions import DownloadError, FileTooLargeError, VideoNotFoundError
 from models import AudioMetadata
 from utils import get_audio_file_location, get_audio_files_directory
@@ -14,8 +18,46 @@ _LOG = getLogger(__name__)
 _YOUTUBE_URL_PREFIX = "https://youtube.com/watch?v={video_id}"
 
 
-def download_audio_file(video_id: str) -> AudioMetadata:
+def search_youtube(query: str, max_results: int = 5) -> list[str]:
+    """Search YouTube and return video IDs.
+    
+    Args:
+        query: Search query string.
+        max_results: Maximum number of results to return (default 5).
+        
+    Returns:
+        List of video IDs, empty list if no results found.
+    """
+    ydl_opts = {
+        "quiet": True,
+        "extract_flat": True,
+        "no_warnings": True,
+    }
+    
+    try:
+        with YoutubeDL(ydl_opts) as ydl:
+            result = ydl.extract_info(f"ytsearch{max_results}:{query}", download=False)
+            
+            if not result:
+                return []
+            
+            entries = result.get("entries", [])
+            if not entries:
+                return []
+            
+            video_ids = [entry.get("id") for entry in entries if entry.get("id")]
+            return video_ids
+    except YtDlpDownloadError as e:
+        _LOG.warning(f"YouTube search failed for query '{query}': {e}")
+        return []
+
+
+def download_audio_file(video_id: str, skip_default_playlist: bool = False) -> AudioMetadata:
     """Download audio from YouTube and save metadata.
+    
+    Args:
+        video_id: The YouTube video ID to download.
+        skip_default_playlist: If True, skip adding to "All Songs" playlist.
     
     Raises:
         FileTooLargeError: If the video exceeds the maximum file size.
@@ -37,7 +79,9 @@ def download_audio_file(video_id: str) -> AudioMetadata:
         raise FileTooLargeError(size_bytes=estimated_size, max_bytes=Config.MAX_FILE_SIZE_BYTES)
     
     upsert_audio_metadata(audio_metadata)
-    add_song_to_playlist(get_default_playlist_id(), video_id)
+    
+    if not skip_default_playlist:
+        add_song_to_playlist(get_default_playlist_id(), video_id)
     
     try:
         ydl.download(video_url)

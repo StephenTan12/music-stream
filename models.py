@@ -72,3 +72,23 @@ class PaginatedPlaylistsResponse(BaseModel):
     total_pages: int
 
     model_config = ConfigDict(alias_generator=to_camel, populate_by_name=True)
+
+
+class FailedSong(BaseModel):
+    title: str
+    artist: str
+    reason: str
+
+    model_config = ConfigDict(alias_generator=to_camel, populate_by_name=True)
+
+
+class PlaylistImportResponse(BaseModel):
+    playlist_id: int
+    playlist_name: str
+    total_songs: int
+    imported_count: int
+    skipped_count: int
+    failed_count: int
+    failed_songs: list[FailedSong]
+
+    model_config = ConfigDict(alias_generator=to_camel, populate_by_name=True)
